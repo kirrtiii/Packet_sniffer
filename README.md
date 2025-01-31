@@ -21,3 +21,19 @@ This tool is useful for analyzing network traffic and debugging packet-level com
 - Install dependencies:
   ```sh
   pip install -r requirements.txt
+
+## **How to Run**
+- python pktsniffer.py -r <pcap_file>
+Limit Number of Packets
+- python pktsniffer.py -r example.pcap -c 10
+Filter by Host IP
+- python pktsniffer.py -r example.pcap --host 192.168.1.1
+Filter by Port
+- python pktsniffer.py -r example.pcap --port 80
+Filter by Network
+- python pktsniffer.py -r example.pcap --net 192.168.1.0/24
+Filter by Protocol
+- python pktsniffer.py -r example.pcap --filter tcp/udp/icmp
+
+
+
