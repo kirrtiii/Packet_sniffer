@@ -41,7 +41,7 @@ def main():
     parser.add_argument("--port", help="Port number to filter packets by", default=None)
     parser.add_argument("--ip", help="IP address to filter packets by", default=None)
 
-    # Protocol filters using --filter
+    # Protocol filters using --filter on the basis of TCP, UDP and icmp
     parser.add_argument("--filter", choices=["tcp", "udp", "icmp"], help="Filter packets by protocol", default=None)
 
     # Network filter
@@ -49,10 +49,8 @@ def main():
 
     args = parser.parse_args()
 
-    # Parse the pcap file
     packets = parse_pcap(args.read)
 
-    # Apply filters based on the arguments provided
     filtered_packets = packets
 
     # Host Filter
@@ -75,11 +73,11 @@ def main():
     if args.net:
         filtered_packets = apply_filters(filtered_packets, "net", args.net)
 
-    # Limit packets if specified
+    # Limit packets if specified (-c)
     if args.count:
         filtered_packets = filtered_packets[:args.count]
 
-    # Print the filtered or all packets
+    # Print the filtered or all packets (no -c filter)
     if filtered_packets:
         for packet in filtered_packets:
             print_packet_details(packet)
