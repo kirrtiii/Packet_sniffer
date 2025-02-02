@@ -18,17 +18,40 @@ PROTOCOL_NAMES = {
 
 def print_packet_details(packet):
     """Pretty print the details of a single packet."""
-    print(f"Packet #{packet['packet_number']}")
-    print("-" * 40)
+    print(f"\nPacket #{packet['packet_number']}")
+    print("-" * 50)
     print(f"Timestamp: {packet['timestamp']}")
+    
+    # Ethernet Header
+    print(f"Packet Size: {packet['packet_size']} bytes")
     print(f"Source MAC: {packet['src_mac']}")
     print(f"Destination MAC: {packet['dst_mac']}")
-    print(f"Source IP: {packet['src_ip']}")
-    print(f"Destination IP: {packet['dst_ip']}")
-    print(f"Protocol: {packet['protocol']}")
-    print(f"Source Port: {packet.get('src_port', 'N/A')}")
-    print(f"Destination Port: {packet.get('dst_port', 'N/A')}")
-    print("-" * 40)
+    print(f"Ethertype: {hex(packet['eth_type'])}")
+
+    # IP Header
+    if packet["src_ip"] and packet["dst_ip"]:
+        print("\nIP Header:")
+        print(f"Version: {packet['ip_version']}")
+        print(f"Header Length: {packet['header_length']} bytes")
+        print(f"Type of Service: {packet['tos']}")
+        print(f"Total Length: {packet['total_length']} bytes")
+        print(f"Identification: {packet['identification']}")
+        print(f"Flags: {packet['flags']}")
+        print(f"Fragment Offset: {packet['fragment_offset']}")
+        print(f"Time to Live: {packet['ttl']}")
+        print(f"Protocol: {packet['protocol']}")
+        print(f"Header Checksum: {packet['header_checksum']}")
+        print(f"Source IP: {packet['src_ip']}")
+        print(f"Destination IP: {packet['dst_ip']}")
+
+    # Transport Layer (TCP/UDP/ICMP)
+    if packet['src_port'] and packet['dst_port']:
+        print("\nEncapsulated Packet:")
+        print(f"Source Port: {packet['src_port']}")
+        print(f"Destination Port: {packet['dst_port']}")
+
+    print("-" * 50)
+
 
 def main():
     # Setup argparse for command-line arguments

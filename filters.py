@@ -22,20 +22,15 @@ def apply_filters(packets, filter_type, value):
             return [pkt for pkt in packets if pkt['protocol'] == value]
     elif filter_type == "net":
         try:
-            # Handle IPv4 networks
-            net = ipaddress.IPv4Network(value, strict=False)
-            return [pkt for pkt in packets if pkt.get('src_ip') and pkt.get('dst_ip') and 
-                    ipaddress.ip_address(pkt['src_ip']) in net or ipaddress.ip_address(pkt['dst_ip']) in net]
-        except ipaddress.AddressValueError:
-            try:
-                # Handle IPv6 networks
-                net = ipaddress.IPv6Network(value, strict=False)
-                return [pkt for pkt in packets if pkt.get('src_ip') and pkt.get('dst_ip') and 
-                        ':' in pkt['src_ip'] and ':' in pkt['dst_ip'] and 
-                        ipaddress.ip_address(pkt['src_ip']) in net or ipaddress.ip_address(pkt['dst_ip']) in net]
-            except ValueError as e:
-                print(f"Invalid network address: {value} - {e}")
-                return []
+            net = ipaddress.ip_network(value, strict=False)
+            return [
+                pkt for pkt in packets 
+                if pkt.get('src_ip') and pkt.get('dst_ip') and
+                (ipaddress.ip_address(pkt['src_ip']) in net or ipaddress.ip_address(pkt['dst_ip']) in net)
+            ]
+        except ValueError as e:
+            print(f"Invalid network address: {value} - {e}")
+            return []
 
 
 

@@ -2,7 +2,6 @@ import dpkt
 import socket
 from utils import format_mac, format_ip
 
-# Protocol number to name mapping
 PROTOCOL_NAMES = {
     1: "ICMP",
     6: "TCP",
@@ -25,20 +24,29 @@ def parse_pcap(filename):
             eth = dpkt.ethernet.Ethernet(buf)
             eth_type = eth.type
 
-            # Extract MAC addresses
+            # Extract Ethernet header details
             src_mac = format_mac(eth.src)
             dst_mac = format_mac(eth.dst)
 
-            # Initialize packet details
             packet = {
                 "packet_number": packet_number,
                 "timestamp": timestamp,
+                "packet_size": len(buf),
                 "src_mac": src_mac,
                 "dst_mac": dst_mac,
                 "eth_type": eth_type,
+                "ip_version": None,
+                "header_length": None,
+                "tos": None,
+                "total_length": None,
+                "identification": None,
+                "flags": None,
+                "fragment_offset": None,
+                "ttl": None,
+                "protocol": None,
+                "header_checksum": None,
                 "src_ip": None,
                 "dst_ip": None,
-                "protocol": None,
                 "src_port": None,
                 "dst_port": None
             }
@@ -46,36 +54,56 @@ def parse_pcap(filename):
             # IPv4 Handling
             if eth_type == dpkt.ethernet.ETH_TYPE_IP:
                 ip = eth.data
-                packet["src_ip"] = format_ip(ip.src)
-                packet["dst_ip"] = format_ip(ip.dst)
-                packet["protocol"] = PROTOCOL_NAMES.get(ip.p, f"Unknown ({ip.p})")
+                packet.update({
+                    "ip_version": ip.v,
+                    "header_length": ip.hl * 4,
+                    "tos": ip.tos,
+                    "total_length": ip.len,
+                    "identification": ip.id,
+                    "flags": ip.df,
+                    "fragment_offset": ip.offset,
+                    "ttl": ip.ttl,
+                    "protocol": PROTOCOL_NAMES.get(ip.p, f"Unknown ({ip.p})"),
+                    "header_checksum": ip.sum,
+                    "src_ip": format_ip(ip.src),
+                    "dst_ip": format_ip(ip.dst),
+                })
 
-                # TCP/UDP ports
+                # TCP/UDP Ports
                 if isinstance(ip.data, dpkt.tcp.TCP):
-                    tcp = ip.data
-                    packet["src_port"] = tcp.sport
-                    packet["dst_port"] = tcp.dport
+                    packet.update({
+                        "src_port": ip.data.sport,
+                        "dst_port": ip.data.dport
+                    })
                 elif isinstance(ip.data, dpkt.udp.UDP):
-                    udp = ip.data
-                    packet["src_port"] = udp.sport
-                    packet["dst_port"] = udp.dport
+                    packet.update({
+                        "src_port": ip.data.sport,
+                        "dst_port": ip.data.dport
+                    })
 
             # IPv6 Handling
             elif eth_type == dpkt.ethernet.ETH_TYPE_IP6:
                 ip6 = eth.data
-                packet["src_ip"] = socket.inet_ntop(socket.AF_INET6, ip6.src)
-                packet["dst_ip"] = socket.inet_ntop(socket.AF_INET6, ip6.dst)
-                packet["protocol"] = PROTOCOL_NAMES.get(ip6.nxt, f"Unknown ({ip6.nxt})")
+                packet.update({
+                    "ip_version": 6,
+                    "total_length": len(ip6),
+                    "ttl": ip6.hlim,
+                    "protocol": PROTOCOL_NAMES.get(ip6.nxt, f"Unknown ({ip6.nxt})"),
+                    "src_ip": socket.inet_ntop(socket.AF_INET6, ip6.src),
+                    "dst_ip": socket.inet_ntop(socket.AF_INET6, ip6.dst),
+                })
 
-                # TCP/UDP ports
+                # TCP/UDP Ports
                 if isinstance(ip6.data, dpkt.tcp.TCP):
-                    tcp = ip6.data
-                    packet["src_port"] = tcp.sport
-                    packet["dst_port"] = tcp.dport
+                    packet.update({
+                        "src_port": ip6.data.sport,
+                        "dst_port": ip6.data.dport
+                    })
                 elif isinstance(ip6.data, dpkt.udp.UDP):
-                    udp = ip6.data
-                    packet["src_port"] = udp.sport
-                    packet["dst_port"] = udp.dport
+                    packet.update({
+                        "src_port": ip6.data.sport,
+                        "dst_port": ip6.data.dport
+                    })
 
             packets.append(packet)
             packet_number += 1
