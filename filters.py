@@ -16,7 +16,7 @@ def apply_filters(packets, filter_type, value):
         elif value == "udp":
             return [pkt for pkt in packets if pkt['protocol'] == 'UDP']
         elif value == "icmp":
-            return [pkt for pkt in packets if pkt['protocol'] == 'ICMP']
+            return [pkt for pkt in packets if pkt['protocol'] in ('ICMP', 'ICMPv6')]
         else:
             # other protocols
             return [pkt for pkt in packets if pkt['protocol'] == value]
