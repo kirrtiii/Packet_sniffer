@@ -3,7 +3,17 @@ import socket
 import ipaddress
 
 def apply_filters(packets, filter_type, value):
-    """Apply filters to the list of packets based on the filter type and value."""
+    """
+    Apply filters to the list of packets based on the filter type and value.
+
+    Args:
+        packets (list): List of packet dictionaries.
+        filter_type (str): Type of filter ('host', 'port', 'ip', 'protocol', 'net').
+        value (str): Filter value to apply.
+
+    Returns:
+        list: Filtered list of packets.
+    """
     if filter_type == "host":
         return [pkt for pkt in packets if value in (pkt['src_ip'], pkt['dst_ip'])]
     elif filter_type == "port":
